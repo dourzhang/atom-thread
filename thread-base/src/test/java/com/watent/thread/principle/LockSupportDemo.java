@@ -22,6 +22,7 @@ public class LockSupportDemo {
         public void run() {
             synchronized (lock) {
                 System.out.println("in " + getName());
+                //中断后不会抛出 InterruptedException 默默返回
                 LockSupport.park();
                 //park 响应中断
                 if (Thread.interrupted()) {
@@ -46,7 +47,7 @@ public class LockSupportDemo {
 //        LockSupport.unpark(t2);
 //        t1.join();
 //        t2.join();
-
+        // 中断 LockSupport.park();
         t1.interrupt();
         LockSupport.unpark(t2);
 
