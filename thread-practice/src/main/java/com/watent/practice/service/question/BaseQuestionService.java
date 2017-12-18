@@ -1,6 +1,6 @@
 package com.watent.practice.service.question;
 
-import com.watent.practice.bizmock.BusiMock;
+import com.watent.practice.bizmock.BusinessMock;
 
 import java.util.Random;
 
@@ -23,7 +23,7 @@ public class BaseQuestionService {
     public static String makeQuestion(Integer questionId, String questionSrc) {
 
         Random r = new Random();
-        BusiMock.business(450 + r.nextInt(100));
+        BusinessMock.business(450 + r.nextInt(100));
 
         return "CompleteProblem[id=" + questionId + " content=:" + questionSrc + "]";
     }

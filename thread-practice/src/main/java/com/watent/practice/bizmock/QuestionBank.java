@@ -62,12 +62,12 @@ public class QuestionBank {
      * @return 问题
      */
     public static QuestionDBVo getQuestion(int id) {
-        BusiMock.business(20);
+        BusinessMock.business(20);
         return questionBankMap.get(id);
     }
 
     public static String getQuestionSha(int i) {
-        BusiMock.business(10);
+        BusinessMock.business(10);
         return questionBankMap.get(i).getSha();
     }
 
@@ -79,9 +79,9 @@ public class QuestionBank {
         @Override
         public void run() {
             Random random = new Random();
-            int problemId = random.nextInt(Consts.QUESTION_BANK_COUNT);
+            int questionId = random.nextInt(Consts.QUESTION_BANK_COUNT);
             String questionContent = getRandomString(700);
-            questionBankMap.put(problemId, new QuestionDBVo(problemId, questionContent, EncryptTools.EncryptBySHA1(questionContent)));
+            questionBankMap.put(questionId, new QuestionDBVo(questionId, questionContent, EncryptTools.EncryptBySHA1(questionContent)));
             //System.out.println("题目【"+problemId+"】被更新！！");
         }
     }

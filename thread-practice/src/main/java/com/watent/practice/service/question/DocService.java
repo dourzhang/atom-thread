@@ -1,6 +1,6 @@
 package com.watent.practice.service.question;
 
-import com.watent.practice.bizmock.BusiMock;
+import com.watent.practice.bizmock.BusinessMock;
 import com.watent.practice.vo.MultiQuestionVo;
 import com.watent.practice.vo.PendingDocVo;
 
@@ -25,7 +25,7 @@ public class DocService {
     public static String upLoadDoc(String docFileName) {
 
         Random r = new Random();
-        BusiMock.business(5000 + r.nextInt(400));
+        BusinessMock.business(5000 + r.nextInt(400));
         return "http://www.xxxx.com/file/upload/" + docFileName;
     }
 
@@ -53,25 +53,25 @@ public class DocService {
      * @throws ExecutionException
      * @throws InterruptedException
      */
-    public static String makeAsyn(PendingDocVo pendingDocVo) throws ExecutionException, InterruptedException {
+    public static String makeAsync(PendingDocVo pendingDocVo) throws ExecutionException, InterruptedException {
         System.out.println("开始处理文档：" + pendingDocVo.getDocName());
 
         //对题目处理结果的缓存
         Map<Integer, MultiQuestionVo> multiProblemVoMap = new HashMap<>(16);
         //并行处理文档中的每个题目
         for (Integer problemId : pendingDocVo.getProblemVoList()) {
-            multiProblemVoMap.put(problemId,
-                    QuestionMultiService.makeProblem(problemId));
+            multiProblemVoMap.put(problemId, QuestionMultiService.makeProblem(problemId));
         }
 
         //获取题目的结果
-        StringBuffer sb = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
         for (Integer problemId : pendingDocVo.getProblemVoList()) {
             MultiQuestionVo multiQuestionVo = multiProblemVoMap.get(problemId);
-            sb.append(
+            buffer.append(
                     multiQuestionVo.getQuestionText() == null
                             ? multiQuestionVo.getQuestionFuture().get().getProcessedContent()
-                            : multiQuestionVo.getQuestionText());
+                            : multiQuestionVo.getQuestionText()
+            );
         }
         return "complete_" + System.currentTimeMillis() + "_" + pendingDocVo.getDocName() + ".pdf";
 

@@ -6,6 +6,7 @@ import java.util.List;
 
 /**
  * 待处理文档实体类
+ *
  * @author Atom
  */
 @Getter

@@ -47,7 +47,7 @@ public class RpcMode {
         public String call() throws Exception {
 
             long start = System.currentTimeMillis();
-            String localName = DocService.makeAsyn(pendingDocVo);
+            String localName = DocService.makeAsync(pendingDocVo);
             System.out.println("文档" + localName + "生成耗时：" + (System.currentTimeMillis() - start) + "ms");
             return localName;
         }

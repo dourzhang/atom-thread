@@ -12,7 +12,12 @@ import java.util.Random;
  */
 public class MakeSrcDoc {
 
-
+    /**
+     * 形成待处理文档
+     *
+     * @param docCount 生成的文档数量
+     * @return 待处理文档列表
+     */
     public static List<PendingDocVo> makeDoc(int docCount) {
 
         Random r = new Random();

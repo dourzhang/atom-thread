@@ -17,6 +17,8 @@ public class QuestionMultiService {
 
     /**
      * 存放处理过题目内容的缓存
+     * 考虑OOM
+     * ConcurrentLinkedHashMap 限定最大容量 并实现一个了基于LRU也就是最近最少使用算法策略的进行更新的缓存
      */
     private static ConcurrentHashMap<Integer, QuestionCacheVo> questionCache = new ConcurrentHashMap<>();
     /**
@@ -26,7 +28,7 @@ public class QuestionMultiService {
     /**
      * 处理的题目的线程池
      */
-    private static ExecutorService makeProblemExec = Executors.newFixedThreadPool(Consts.THREAD_COUNT_BASE * 2);
+    private static ExecutorService makeProblemExecPool = Executors.newFixedThreadPool(Consts.THREAD_COUNT_BASE * 2);
 
     /**
      * 供调用者使用，返回题目的内容或者任务
@@ -35,6 +37,7 @@ public class QuestionMultiService {
      * @return
      */
     public static MultiQuestionVo makeProblem(Integer questionId) {
+
         //检查缓存中是否存在
         QuestionCacheVo problemCacheVo = questionCache.get(questionId);
         if (null == problemCacheVo) {
@@ -53,20 +56,28 @@ public class QuestionMultiService {
         }
     }
 
-    //返回题目的工作任务
+    /**
+     * 返回题目的工作任务
+     *
+     * @param questionId
+     * @return
+     */
     private static Future<QuestionCacheVo> getQuestionFuture(Integer questionId) {
 
+        //校验正在进行中缓存任务
         Future<QuestionCacheVo> problemFuture = processingProblemCache.get(questionId);
         if (problemFuture == null) {
             QuestionDBVo problemDBVo = QuestionBank.getQuestion(questionId);
             ProblemTask problemTask = new ProblemTask(problemDBVo, questionId);
             //当前线程新启了一个任务
             FutureTask<QuestionCacheVo> ft = new FutureTask<>(problemTask);
+            //A 进行中缓存存
             problemFuture = processingProblemCache.putIfAbsent(questionId, ft);
+            //Note
             if (problemFuture == null) {
                 //表示没有别的线程正在处理当前题目
                 problemFuture = ft;
-                makeProblemExec.execute(ft);
+                makeProblemExecPool.execute(ft);
                 System.out.println("题目【" + questionId + "】计算任务启动，请等待完成>>>>>>>>>>>>>。");
             } else {
                 System.out.println("刚刚有其他线程启动了题目【" + questionId + "】的计算任务，任务不必开启");
@@ -96,9 +107,11 @@ public class QuestionMultiService {
                 QuestionCacheVo questionCacheVo = new QuestionCacheVo();
                 questionCacheVo.setProcessedContent(BaseQuestionService.makeQuestion(questionId, questionDBVo.getContent()));
                 questionCacheVo.setProblemSha(questionDBVo.getSha());
+                //处理完成任务缓存 放入
                 questionCache.put(questionId, questionCacheVo);
                 return questionCacheVo;
             } finally {
+                //A 进行中缓存移除
                 //无论正常还是异常，都需要将生成的题目的任务从缓存移除
                 processingProblemCache.remove(questionId);
             }
